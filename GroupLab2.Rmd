@@ -1,0 +1,20 @@
+---
+title: "Group Lab 2"
+author: "Jin Chang, Carmelita Deleon, Kevin Ho, Alisha Husain, Billy Wang"
+date: "1/28/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Calling Lab2.R
+source('Lab2.R')
+```
+
+
+
+```{r , warning=FALSE, message=FALSE}
+
+```
+
