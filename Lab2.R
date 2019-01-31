@@ -44,12 +44,12 @@ total <- aggregate(. ~ work_tract + home_tract, data = od[,c(3,14,15)], FUN=sum)
 ## All the data compiled together
 overall <- aggregate(.~ work_tract + home_tract, data = od[,c(3,10,11,14,15)], FUN=sum)
 
-# Creating a work tract column
-bellevue$work_tract <- 0
+# renaming a work tract column
+colnames(bellevue)[1] <- "work_tract"
 
 # Joing the data to only show Bellevue data
-wt_tract <- merge(bellevue, wtutract, by="work_tract")
-man_tract <- mergeIt(mantract)
-total_tract <- mergeIt(total)
-overall_bell <- mergeIt(overall)
+wt_tract <- merge(bellevue, wtutract, by= "work_tract")
+man_tract <- merge(bellevue, mantract, by= "work_tract")
+total_tract <- merge(bellevue, total, by= "work_tract")
+overall_bell <- merge(bellevue, overall, by= "work_tract")
 
