@@ -43,8 +43,6 @@ createMatrix <- function(data, key) {
   return (d)
 }
 
-# Sets and cleans the table while returns a table with new columns for specified fields
-clean <- function()
 ## OD data
 # setting and cleaning the table 
 od$w_geocode <- as.character(od$w_geocode)
