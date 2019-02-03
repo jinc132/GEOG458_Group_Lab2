@@ -24,90 +24,61 @@ bellevue <- wa_tracts %>%
   filter(NAME %in% tnums)
 
 
-# Part 2 
-# Returns the merged data
-mergeIt <- function(data) {
-  return (merge(bellevue, data, by ="work_tract", all.x = TRUE))
-}
-
-# Returns an aggregate dataset with the specified data
-aggregateIt <- function(indexs) {
-  return (aggregate(. ~ work_tract + home_tract, data = indexs, FUN=sum))
-}
-
-# Produce a matrix with a worktract as rows and hometract as columns
-createMatrix <- function(data, key) {
-  d <- acast(data, work_tract ~ home_tract, value.var = key)
-  d[is.na(d)] <- 0
-  return (d)
-}
-
+# Part 2
 ## OD data
 # setting and cleaning the table 
 od$w_geocode <- as.character(od$w_geocode)
 od$h_geocode <- as.character(od$h_geocode)
 od <- od %>%
   mutate(w_geocode = replace(w_geocode, length(w_geocode) == 14, "0"),
-         h_geocode = replace(w_geocode, length(w_geocode) == 14, "0"))
+         h_geocode = replace(h_geocode, length(w_geocode) == 14, "0"))
 
 # Creating columns for worktract and hometract
 od$work_tract <- substr(od$w_geocode, 1, 11)
 od$home_tract <- substr(od$h_geocode, 1, 11)
 
-# Aggregating WTU occupations by work_tract
-## Trade, Transportation, and Utilities jobs
-wtutract <- aggregateIt(od[,c(11,14,15)])
-
-## Goods Producing industry jobs
-mantract <- aggregateIt(od[,c(10,14,15)])
-
-## Total number of jobs
-total <- aggregateIt(od[,c(3,14,15)])
-
-## All the data compiled together
-overall <- aggregateIt(od[,c(3,10,11,14,15)])
-
 # renaming a work tract column
 colnames(bellevue)[5] <- paste("work_tract")
 
 # Joining the data to only show Bellevue data
-wtu_tract <- mergeIt(wtutract)
-man_tract <- mergeIt(mantract)
-total_tract <- mergeIt(total)
-overall_bell <- mergeIt(overall)
+overall_bell <- merge(bellevue, od, by ="work_tract", all.x = TRUE)
 
 # Creating block level and check for duplicates
 block<- unique(od[,1:2])
 nrow(block) == nrow(od)
 
-# Added a count column for the number of sending blocks
-block$count <- 1
+## Added a count column for the number of sending blocks
+block$block_ct <- 1
 
-# Get number of blocks "sending" jobs to work block
-send_wb <- aggregate(. ~ w_geocode, data=block[,-2], FUN=sum)
+## Get number of blocks "sending" jobs to work block
+work_block <- aggregate(. ~ w_geocode, data=block[,-2], FUN=sum)
 
-# Use sum job variable S000 to get count of "jobs" to work block
-jobs_wb <- aggregate(. ~ w_geocode, data=od[,c(1,3)], FUN=sum)
+## Use sum job variable S000 to get count of "jobs" to work block
+jobs_wb <- aggregate(. ~ w_geocode, data=od[,c(1:3)], FUN=sum)
 
-# Merge the two dataframes together by work block FIPS
-work_block <- merge(send_wb, jobs_wb, by="w_geocode")
+## Merge the two dataframes together by work block FIPS
+work_block <- merge(work_block, jobs_wb, by="w_geocode")
 
-# Creates a file with home_tract and w_geocode
-s <- unique(od[,c(1,15)])
+## Creates a file with home_tract and w_geocode
+home_block <- unique(od[,c(1,15)])
 
-# Added a count column for the number of sending tracts
-s$tract_ct <- 1
+## Added a count column for the number of sending tracts
+home_block$tract_ct <- 1
 
-# Number of tracts "sending" jobs to work block
-s <- aggregate(. ~ w_geocode, data=s[,c(1,3)], FUN=sum)
-work_block <- merge(work_block, s, by="w_geocode")
+## Number of tracts "sending" jobs to work block
+home_block <- aggregate(. ~ w_geocode, data=home_block[,c(1,3)], FUN=sum)
+final_block <- merge(work_block, home_block, by="w_geocode")
 
 # Produce a matrix with a worktract as rows and hometract as columns
-wtod_tract <- createMatrix(wtu_tract, "SI02")
-manod_tract <- createMatrix(man_tract, "SI01")
-total_tract <- createMatrix(total_tract, "S000")
+bell_relate <- overall_bell %>%
+  select(work_tract, home_tract, S000, SA01, SA02, SE01, SE02, SE03, SI01, SI02, SI03)
 
-## WAC
+total_tract <- dcast(bell_relate, work_tract ~ home_tract, value.var = "S000")
+total_tract[is.na(total_tract)] <- 0
+
+write.table(total_tract,"total_tract.csv")
+
+# WAC
 wac$w_geocode <- as.character(wac$w_geocode)
 wac <- wac %>%
   mutate(w_geocode = replace(w_geocode, length(w_geocode) == 14, "0"))
@@ -121,7 +92,7 @@ wt_wac <- aggregate(. ~ wac$work_tract,  data= wac[,c(2,11,13,14,16)], FUN=sum)
 colnames(wt_wac)[1] <- "work_tract"
 
 # Merge the data so its data pertains to bellevue tract area
-wac_bell <- mergeIt(wt_wac)
+wac_bell <- merge(bellevue, wt_wac, by ="work_tract", all.x = TRUE)
 
 ## RAC
 rac$h_geocode <- as.character(rac$h_geocode)
