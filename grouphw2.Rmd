@@ -8,7 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
+This is Part 3, Second Step
 
 In our first map here, we take cumulative total jobs, denoted by the S000 column and display it's distrubtion through 
 all of the given worktracts. Average job availability through all givenworktracts seems to be between the 20-50 value range, although you have extreme outliers popping out between each quantile range. These extreme outlier values are to be expected but not heavily reflected upon, as there are only a dozen standout extreme values in a dataset of 223,560 objects. There seems no forming pattern or trend to high job availability or low job availability in any spread of the worktracts, and distribution throughout is quite standardized, albiet segemented. 
