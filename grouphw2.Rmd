@@ -1,0 +1,53 @@
+---
+title: "grouphw2"
+author: "Billy Wang"
+date: "February 6, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+## Loading Data 
+```{r first, echo=TRUE}
+library(tidyverse)
+od <- read.csv('wa_od_main_JT00_2015.csv')
+rac <- read.csv('wa_rac_S000_JT00_2015.csv')
+wac <- read.csv('wa_wac_S000_JT00_2015.csv')
+
+
+tot_jobs <- od[c("w_geocode", "S000")]
+tot_jobs_10 <- head(arrange(tot_jobs, desc(tot_jobs$S000)),10)
+barplot(od$S000,
+names.arg = od$w_geocode,
+main = "Total Jobs By WAC Tracts",
+xlab = "WAC Codes",
+ylab = "Number of Jobs",
+col = "darkred",)
+
+hist(od$SE01, col=rgb(1,0,0,0.7), alpha=0.3, xlim=c(0,60), ylim=c(0,100), main="Number of Jobs Overlayed with SE01 & SE02", xlab="Number of Jobs By Salary")
+hist(od$SE02, col=rgb(1,1,0,0.4), alpha=0.7, add=T)
+box()
+
+hist(od$SE02, col=rgb(1,1,0,0.7), alpha=0.3, xlim=c(0,200), ylim=c(0,100), main="Number of Jobs Overlayed with SE02 & SE03", xlab="Number of Jobs By Salary")
+hist(od$SE03, col=rgb(0,1,1,0.4), alpha=0.7, add=T)
+box()
+
+
+require(tidyr)
+library(ggplot2)
+data_long <- gather(edu_all, variable, value, edu1:edu4, factor_key=TRUE, -wcodes)
+ggplot(data_long,aes(x=wcodes,y=value,fill=variable))+
+  geom_point(size=2,shape = 23)
+
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
